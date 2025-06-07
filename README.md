@@ -1,23 +1,30 @@
 # Filament Translation Editor
 
-🔤 A full-featured translation manager for Laravel 12 + Filament 3, without database overhead.
+🔤 A real translation manager for Laravel 12 + Filament 3 — zero migrations, zero excuses.
 
 ---
 
-## 🧩 Features
+## 🧩 Core Features
 
-- ✅ Manage PHP and JSON translation files directly
-- ✅ Supports nested array keys with custom `<~>` separator
-- ✅ Real-time search & filtering
-- ✅ Pagination for large files
-- ✅ Livewire-powered tabbed interface
-- ✅ Auto-save (configurable)
-- ✅ Multi-language support with 80+ native names
-- ✅ Fully responsive design
-- ✅ Dark/Light mode
-- ✅ Plugin translations via `/lang/vendor/fteditor.php`
-- ✅ Chainable config methods for power users
-- ✅ Publishable config, views, and language files
+- ✅ Manage **core** translation files (`/lang/{locale}`, `/lang/{locale}.json`)
+- ✅ Supports **package translations** in `/lang/vendor/{package}/{locale}`
+- ✅ JSON support (core only — packages use PHP only)
+- ✅ Nested arrays using custom `<~>` notation (e.g., `validation<~>between<~>string`)
+- ✅ Real-time search & pagination
+- ✅ Auto-save mode (optional)
+- ✅ 80+ languages with native names
+- ✅ No database, no models, no crying
+
+---
+
+## 🙅 What it doesn’t do (yet)
+
+Just to set expectations:
+
+- ❌ Does not create new language files
+- ❌ Does not delete files
+- ❌ Does not sync missing keys (you forgot them, not me), I have another package for that.
+- ❌ Does not generate Excel reports, pay taxes, or make you coffee
 
 ---
 
@@ -27,7 +34,7 @@
 composer require sepremex/filament-translation-editor
 ```
 
-Register the plugin inside your Filament panel:
+Add it to your Filament panel:
 
 ```php
 ->plugin(\Sepremex\FilamentTranslationEditor\FilamentTranslationEditorPlugin::make())
@@ -35,48 +42,45 @@ Register the plugin inside your Filament panel:
 
 ---
 
-## 🛠 Configuration & Assets
+## 🛠 Publishing Resources
 
-### Publish everything
-
+### Everything
 ```bash
 php artisan vendor:publish --provider="Sepremex\FilamentTranslationEditor\FilamentTranslationEditorServiceProvider"
 ```
 
-### Publish config only
-
+### Config only
 ```bash
 php artisan vendor:publish --tag=filament-translation-editor-config
 ```
 
-### Publish views
-
+### Views
 ```bash
 php artisan vendor:publish --tag=filament-translation-editor-views
 ```
 
-### Publish translations
-
+### Translations
 ```bash
 php artisan vendor:publish --tag=filament-translation-editor-translations
 ```
 
 ---
 
-## ⚙️ Config File Overview
+## ⚙️ Config Overview
 
-Located at: `config/filament-translation-editor.php`
+Available at: `config/filament-translation-editor.php`
 
 ```php
 'supported_extensions' => ['php', 'json'],
 'support_json' => true,
 'path' => 'lang',
 'auto_save' => false,
-'key_separator' => '<~>',
-'per_page' => 20,
+'key_separator' => '<~>', // not in use from config yet...
+'per_page' => 20, // secret for next stage...
 'search_enabled' => true,
 'allow_delete' => true,
-'include_vendor_languages' => false,
+'include_vendor_languages' => true,
+'vendor_namespace' => 'vendor',
 'default_locale' => 'en',
 ```
 
@@ -84,19 +88,18 @@ Located at: `config/filament-translation-editor.php`
 
 ## ❤️ Disclaimer
 
-> I wanted this to be clean, elegant, and Laravelish™️...  
-> But then Filament happened.  
-> Route model binding? Poof. Resource-style pages? Nope.  
-> So now we’re using custom pages. You’ll survive. I might refactor it one day...
+> I wanted it clean and elegant...  
+> But Filament had other plans.  
+> So here we are — custom pages, magical readers, and zero database migrations.  
+> You're welcome.
 
-Thanks for trying this out — made with 💖 by [Sepremex].
+Use it. Abuse it. Translate responsibly.  
+Built with sarcasm and ❤️ by [Sepremex].
+
+### Thanks for trying this out
 
 ---
 
-## 🧪 Tests
-
-Coming soon!
-
 ## 📄 License
 
-MIT — use it, hack it, improve it.
+MIT — porque lo bueno se comparte, excepto la tóxica.

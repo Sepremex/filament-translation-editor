@@ -64,7 +64,7 @@
                         color="primary"
                         size="sm"
                         tag="a"
-                        href="{{ \Sepremex\FilamentTranslationEditor\Pages\EditVendorLanguageFile::getUrl(['package' => $package, 'language' => $lang['code'], 'filename' => $file]) }}"
+                        href="{{ \Sepremex\FilamentTranslationEditor\Pages\EditVendorLanguage::getUrl(['record' => $package, 'language' => $lang['code']]) }}"
                         class="w-full"
                     >
                         Edit Files

@@ -16,8 +16,6 @@ use Sepremex\FilamentTranslationEditor\Utils\ArrayHelper;
 
 class LanguageManager
 {
-
-
     public function __construct(
         protected Filesystem $files
     ) {}
@@ -207,10 +205,7 @@ class LanguageManager
     public function writeVendorTranslationFile(string $package, string $languageCode, string $filename, array $translations): bool
     {
         $filePath = $this->getVendorTranslationFilePath($package, $languageCode, $filename);
-
-        // Generate PHP file content
-        $phpContent = '<?php' . PHP_EOL . PHP_EOL . 'return ' . var_export($translations, true) . ';' . PHP_EOL;
-
+        $phpContent = "<?php\n\nreturn " . ArrayHelper::arrayToPhpString($translations, 0) . ";\n";
         return $this->files->put($filePath, $phpContent) !== false;
     }
 

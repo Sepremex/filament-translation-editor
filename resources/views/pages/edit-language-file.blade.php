@@ -89,11 +89,6 @@
                 @if($errors->has('newKey'))
                     <div class="text-red-600 text-xs mt-1">{{ $errors->first('newKey') }}</div>
                 @endif
-              {{--  @if(session()->has('message'))
-                    <div class="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg">
-                        {{ session('message') }}
-                    </div>
-                @endif--}}
             </x-slot>
 
             <form wire:submit.prevent="save">
