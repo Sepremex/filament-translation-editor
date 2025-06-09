@@ -90,7 +90,7 @@
                             label="{{ __('filament-translation-editor::fteditor.actions.edit') }}"
                             tooltip="{{ __('filament-translation-editor::fteditor.actions.edit') }}"
                         />
-                        <x-filament::icon-button
+                        {{--<x-filament::icon-button
                             icon="heroicon-m-trash"
                             color="danger"
                             size="sm"
@@ -98,7 +98,7 @@
                             wire:confirm="Are you sure you want to delete this language?"
                             label="{{ __('filament-translation-editor::fteditor.actions.delete') }}"
                             tooltip="{{ __('filament-translation-editor::fteditor.actions.delete') }}"
-                        />
+                        />--}}
 
                     </div>
                 </div>
