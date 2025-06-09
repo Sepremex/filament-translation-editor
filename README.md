@@ -12,12 +12,14 @@
 - ✅ Nested arrays using custom `<~>` notation (e.g., `validation<~>between<~>string`)
 - ✅ Real-time search & pagination
 - ✅ Auto-save mode (optional)
+- ✅ **Auto-sync keys across languages** — add once, sync everywhere
+- ✅ **Smart array cleanup** — removes empty parent arrays automatically
 - ✅ 80+ languages with native names
 - ✅ No database, no models, no crying
 
 ---
 
-## 🙅 What it doesn’t do (yet)
+## 🙅 What it doesn't do (yet)
 
 Just to set expectations:
 
@@ -86,15 +88,67 @@ Available at: `config/filament-translation-editor.php`
 
 ---
 
+## 🎯 Best Practices (Or: How Not to Break Things)
+
+### 🔍 Search Before You Add
+
+**Golden Rule**: Always search for a key before adding it.
+
+```
+❌ Don't: Add `user.name` when `user` already exists as a string
+✅ Do: Search "user" first, then decide wisely
+```
+
+The plugin will auto-sync your new keys across all languages, but it won't fix your poor life choices.
+
+### 🧠 Nested Arrays 101
+
+Use `<~>` for nested structures:
+
+```
+✅ Good: validation<~>email<~>required → 'validation' => ['email' => ['required' => 'value']]
+❌ Bad: validation.email.required → 'validation.email.required' => 'value'
+```
+
+Dots (`.`) are **literal** — they're part of the key, not separators. Don't be that person.
+
+### ⚡ Auto-Sync Magic
+
+When you add/remove keys, they automatically sync to other languages:
+
+- **Adding**: Creates the key in all languages (if it doesn't exist)
+- **Removing**: Removes from all languages + cleans empty parent arrays
+- **Existing keys**: Won't overwrite — we're smart like that
+
+### 🚨 Common Gotchas
+
+1. **Mixed Types**: Don't mix strings and arrays for the same key across languages
+2. **Empty Search**: Use the search box — it's there for a reason
+3. **Backup First**: Enable `create_backup` in config if you're feeling dangerous
+4. **Case Sensitivity**: `User` ≠ `user` — Laravel cares, so should you
+
+---
+
+## 🔧 Pro Workflow
+
+1. **🔍 Search** for existing keys first
+2. **📝 Add** only what doesn't exist
+3. **💾 Save** (or enable auto-save for YOLO mode)
+4. **🎉 Enjoy** your magically synced translations
+
+Remember: The plugin is smarter than your average developer, but it can't fix stupidity.
+
+---
+
 ## ❤️ Disclaimer
 
 > I wanted it clean and elegant...  
 > But Filament had other plans.  
-> So here we are — custom pages, magical readers, and zero database migrations.  
+> So here we are — custom pages, magical readers, zero database migrations, and auto-sync wizardry.  
 > You're welcome.
 
 Use it. Abuse it. Translate responsibly.  
-Built with sarcasm and ❤️ by [Sepremex].
+Built with sarcasm, auto-sync magic, and ❤️ by [Sepremex].
 
 ### Thanks for trying this out
 

@@ -29,6 +29,9 @@ class EditLanguageFile extends Page
     public string $search = '';
     public int $perPage = 20;
     public int $currentPage = 1;
+    public string $lastOperation = '';
+    public string $lastKey = '';
+    public string $lastValue = '';
 
     public function getTitle(): string
     {
@@ -121,6 +124,12 @@ class EditLanguageFile extends Page
 
         // Limpiar campos
         $newkyadded = $this->newKey;
+
+        // FIXME sync with others.
+        $this->lastOperation = 'add';
+        $this->lastKey = $this->newKey;
+        $this->lastValue = $this->newValue;
+
         $this->newKey = '';
         $this->newValue = '';
         $this->resetErrorBag();
@@ -147,6 +156,12 @@ class EditLanguageFile extends Page
     public function removeKey(string $uuid): void
     {
         $oldskey = $this->translations[$uuid];
+
+        // FIXME sync other langs
+        $this->lastOperation = 'remove';
+        $this->lastKey = $oldskey['key'];
+        $this->lastValue = $oldskey['value'];
+
         unset($this->translations[$uuid]);
 
         // Si después de eliminar no hay elementos filtrados, limpiar búsqueda
@@ -243,7 +258,46 @@ class EditLanguageFile extends Page
         if ($autoSiNo) {
             $this->save();
         }
+
+        $this->syncKeyToOtherLanguages();
+
     }
 
+    /**
+     * Sync with other files
+     * Method idea by GH: lfjaimesb
+     *
+     * @return void
+     */
+    private function syncKeyToOtherLanguages(): void
+    {
+        // Solo sincronizar si hay una operación pendiente
+        if(empty($this->lastOperation) || empty($this->lastKey)){
+            return;
+        }
+
+        try {
+            $syncService = app(\Sepremex\FilamentTranslationEditor\Services\TranslationSyncService::class);
+
+            $syncedLanguages = $syncService->syncKeyToOtherLanguages($this->lang, $this->file, $this->lastKey, $this->lastValue, $this->lastOperation);
+
+            // Mostrar notificación de sincronización si se sincronizaron idiomas
+            if(!empty($syncedLanguages)){
+                $languagesList = implode(', ', $syncedLanguages);
+                $operationText = $this->lastOperation === 'add' ? 'added to' : 'removed from';
+
+                Notification::make()->title('Key synchronized!')->body("Key '{$this->lastKey}' was {$operationText} languages: {$languagesList}")->success()->duration(4000)->send();
+            }
+
+        } catch(\Exception $e) {
+            // Error en sincronización - no es crítico, solo log
+            \Log::warning('Translation sync failed: ' . $e->getMessage());
+        } finally {
+            // Limpiar datos de operación
+            $this->lastOperation = '';
+            $this->lastKey = '';
+            $this->lastValue = '';
+        }
+    }
 
 }

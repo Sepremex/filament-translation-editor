@@ -41,13 +41,13 @@ return [
     |--------------------------------------------------------------------------
     | when false it will ignore read_vendor and vendor_package
     */
-    'vendor_auto_detect' => false, // Auto-detect packages in /vendor/
+    'vendor_auto_detect' => true, // Auto-detect packages in /vendor/
     /*
      | when true
      | reads values from vendor_packages
      |
      */
-    'read_vendor' => env('FILAMENT_TRANSLATION_EDITOR_VENDOR', false),
+    'read_vendor' => env('FILAMENT_TRANSLATION_EDITOR_VENDOR', true),
     /*
      | when empty | it reads all vendors
      | otherwise it will try to read vendors with the name

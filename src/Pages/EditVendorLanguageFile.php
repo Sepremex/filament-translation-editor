@@ -26,6 +26,9 @@ class EditVendorLanguageFile extends Page
     public int $currentPage = 1;
     public string $newKey = '';
     public string $newValue = '';
+    public string $lastOperation = '';
+    public string $lastKey = '';
+    public string $lastValue = '';
     public static function shouldRegisterNavigation(): bool
     {
         return false;
@@ -127,6 +130,11 @@ class EditVendorLanguageFile extends Page
     public function removeKey(string $uuid): void
     {
         $oldskey = $this->translations[$uuid];
+
+        $this->lastOperation = 'remove';
+        $this->lastKey = $oldskey['key'];
+        $this->lastValue = $oldskey['value'];
+
         unset($this->translations[$uuid]);
 
         // Si después de eliminar no hay elementos filtrados, limpiar búsqueda
@@ -178,6 +186,12 @@ class EditVendorLanguageFile extends Page
 
         // Limpiar campos
         $newkyadded = $this->newKey;
+
+        // FIXME sync langs
+        $this->lastOperation = 'add';
+        $this->lastKey = $this->newKey;
+        $this->lastValue = $this->newValue;
+
         $this->newKey = '';
         $this->newValue = '';
         $this->resetErrorBag();
@@ -260,6 +274,56 @@ class EditVendorLanguageFile extends Page
         $autoSiNo = config('filament-translation-editor.auto_save_changes', false);
         if ($autoSiNo) {
             $this->save();
+        }
+
+        $this->syncKeyToOtherVendorLanguages();
+    }
+
+    /**
+     * Sync with other files
+     * Method idea by GH: lfjaimesb
+     *
+     * @return void
+     */
+    private function syncKeyToOtherVendorLanguages(): void
+    {
+        // Solo sincronizar si hay una operación pendiente
+        if (empty($this->lastOperation) || empty($this->lastKey)) {
+            return;
+        }
+        try {
+            $syncService = app(\Sepremex\FilamentTranslationEditor\Services\TranslationSyncService::class);
+
+            $syncedLanguages = $syncService->syncKeyToOtherVendorLanguages(
+                $this->package,
+                $this->language,
+                $this->filename,
+                $this->lastKey,
+                $this->lastValue,
+                $this->lastOperation
+            );
+
+            // Mostrar notificación de sincronización si se sincronizaron idiomas
+            if (!empty($syncedLanguages)) {
+                $languagesList = implode(', ', $syncedLanguages);
+                $operationText = $this->lastOperation === 'add' ? 'added to' : 'removed from';
+
+                Notification::make()
+                    ->title('Vendor key synchronized!')
+                    ->body("Key '{$this->lastKey}' was {$operationText} package '{$this->package}' in languages: {$languagesList}")
+                    ->success()
+                    ->duration(4000)
+                    ->send();
+            }
+
+        } catch (\Exception $e) {
+            // Error en sincronización - no es crítico, solo log
+            \Log::warning('Vendor translation sync failed: ' . $e->getMessage());
+        } finally {
+            // Limpiar datos de operación
+            $this->lastOperation = '';
+            $this->lastKey = '';
+            $this->lastValue = '';
         }
     }
 }
