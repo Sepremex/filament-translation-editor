@@ -13,20 +13,25 @@ namespace Sepremex\FilamentTranslationEditor\Services;
 use Sepremex\FilamentTranslationEditor\Services\LanguageFileReader;
 use Sepremex\FilamentTranslationEditor\Services\LanguageFileWriter;
 use Sepremex\FilamentTranslationEditor\Services\LanguageManager;
+use Sepremex\FilamentTranslationEditor\Services\Translation\TranslationManager;
+
 class TranslationSyncService
 {
     protected LanguageFileReader $reader;
     protected LanguageFileWriter $writer;
     protected LanguageManager $languageManager;
+    protected TranslationManager $translationManager;
 
     public function __construct(
         LanguageFileReader $reader,
         LanguageFileWriter $writer,
-        LanguageManager $languageManager
+        LanguageManager $languageManager,
+        TranslationManager $translationManager
     ) {
         $this->reader = $reader;
         $this->writer = $writer;
         $this->languageManager = $languageManager;
+        $this->translationManager = $translationManager;
     }
 
     /**
@@ -36,6 +41,28 @@ class TranslationSyncService
     {
         $syncedLanguages = [];
         $availableLanguages = $this->getAvailableLanguages();
+
+        // Prepare for auto-translation if adding
+        $autoTranslations = [];
+        if ($operation === 'add' && $this->translationManager->isAutoTranslationEnabled()) {
+            $targetLanguages = array_diff($availableLanguages, [$currentLang]);
+
+            if (!empty($targetLanguages)) {
+                try {
+                    $result = $this->translationManager->translateToMultiple($value, $currentLang, $targetLanguages);
+                    $autoTranslations = $result['translations'];
+
+                    // Log any translation errors
+                    if (!empty($result['errors'])) {
+                        foreach ($result['errors'] as $lang => $error) {
+                            \Log::warning("Auto-translation failed for {$lang}: {$error}");
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning("Auto-translation service failed: " . $e->getMessage());
+                }
+            }
+        }
 
         foreach ($availableLanguages as $lang) {
             // Skip current language
@@ -49,7 +76,9 @@ class TranslationSyncService
                 if ($operation === 'add') {
                     // Only add if key doesn't exist
                     if (!array_key_exists($key, $existingTranslations)) {
-                        $existingTranslations[$key] = $value;
+                        // Use auto-translated value if available, otherwise use original
+                        $translatedValue = $autoTranslations[$lang] ?? $value;
+                        $existingTranslations[$key] = $translatedValue;
 
                         if ($this->writer->write($lang, $fileName, $existingTranslations)) {
                             $syncedLanguages[] = $lang;
@@ -82,6 +111,28 @@ class TranslationSyncService
         $syncedLanguages = [];
         $availableLanguages = $this->getAvailableVendorLanguages($package);
 
+        // Prepare for auto-translation if adding
+        $autoTranslations = [];
+        if ($operation === 'add' && $this->translationManager->isAutoTranslationEnabled()) {
+            $targetLanguages = array_diff($availableLanguages, [$currentLang]);
+
+            if (!empty($targetLanguages)) {
+                try {
+                    $result = $this->translationManager->translateToMultiple($value, $currentLang, $targetLanguages);
+                    $autoTranslations = $result['translations'];
+
+                    // Log any translation errors
+                    if (!empty($result['errors'])) {
+                        foreach ($result['errors'] as $lang => $error) {
+                            \Log::warning("Vendor auto-translation failed for {$lang}: {$error}");
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning("Vendor auto-translation service failed: " . $e->getMessage());
+                }
+            }
+        }
+
         foreach ($availableLanguages as $lang) {
             // Skip current language
             if ($lang === $currentLang) {
@@ -94,7 +145,9 @@ class TranslationSyncService
                 if ($operation === 'add') {
                     // Only add if key doesn't exist
                     if (!$this->arrayKeyExistsFlat($key, $existingTranslations)) {
-                        $this->setArrayValueByKey($existingTranslations, $key, $value);
+                        // Use auto-translated value if available, otherwise use original
+                        $translatedValue = $autoTranslations[$lang] ?? $value;
+                        $this->setArrayValueByKey($existingTranslations, $key, $translatedValue);
 
                         if ($this->languageManager->writeVendorTranslationFile($package, $lang, $fileName, $existingTranslations)) {
                             $syncedLanguages[] = $lang;

@@ -21,6 +21,12 @@ class FilamentTranslationEditorServiceProvider extends ServiceProvider
             __DIR__ . '/../config/filament-translation-editor.php',
             'filament-translation-editor'
         );
+        $this->app->singleton(
+            \Sepremex\FilamentTranslationEditor\Services\Translation\TranslationManager::class,
+            function ($app) {
+                return new \Sepremex\FilamentTranslationEditor\Services\Translation\TranslationManager();
+            }
+        );
     }
 
     public function boot(): void

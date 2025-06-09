@@ -153,17 +153,6 @@ return [
         'edit_translations' => 'edit_translations',
         'delete_translations' => 'delete_translations',
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Backup
-    |--------------------------------------------------------------------------
-    |
-    | Whether to create backups before modifying translation files.
-    |
-    */
-    'create_backup' => env('FILAMENT_TRANSLATION_EDITOR_BACKUP', true),
-
     /*
     |--------------------------------------------------------------------------
     | Auto-detect Languages
@@ -195,4 +184,50 @@ return [
     |
     */
     'auto_save_changes' => true,
+    /*
+   |--------------------------------------------------------------------------
+   | Auto Translation
+   |--------------------------------------------------------------------------
+   |
+   | Automatically translate new keys to other available languages.
+   | When you add a key in one language, it will be translated and synced
+   | to all other languages using the configured translation provider.
+   |
+   */
+    'auto_translate' => [
+        'enabled' => env('FILAMENT_TRANSLATION_AUTO_TRANSLATE', true),
+
+        'provider' => env('FILAMENT_TRANSLATION_PROVIDER', 'libretranslate'),
+
+        'providers' => [
+            'libretranslate' => [
+                // URL Examples:
+                // Local Docker: 'http://localhost:5000'
+                // Official hosted: 'https://libretranslate.com'
+                // Custom hosted: 'https://translate.yourcompany.com'
+                // Leave null for auto-detection
+                'url' => env('LIBRETRANSLATE_URL', 'http://localhost:5000'),
+                'api_key' => env('LIBRETRANSLATE_API_KEY', null), // Optional for most instances
+            ],
+
+            'microsoft' => [
+                'api_key' => env('MICROSOFT_TRANSLATOR_KEY', null), // Required
+                'region' => env('MICROSOFT_TRANSLATOR_REGION', 'global'), // global, eastus, westus, etc.
+                // Endpoint Examples:
+                // Global: 'https://api.cognitive.microsofttranslator.com'
+                // Regional: 'https://eastus.api.cognitive.microsofttranslator.com'
+                'endpoint' => env('MICROSOFT_TRANSLATOR_ENDPOINT', 'https://api.cognitive.microsofttranslator.com'),
+            ],
+
+            'google' => [
+                'api_key' => env('GOOGLE_TRANSLATE_KEY', null), // Required
+                // Endpoint Examples:
+                // Default: 'https://translation.googleapis.com'
+                // Custom: 'https://translation.googleapis.com' (rarely changed)
+                'endpoint' => env('GOOGLE_TRANSLATE_ENDPOINT', 'https://translation.googleapis.com'),
+            ],
+
+            // Add more providers as needed...
+        ],
+    ],
 ];
